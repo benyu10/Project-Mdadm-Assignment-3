@@ -5,16 +5,7 @@
 #include "mdadm.h"
 #include "jbod.h"
 
-char *help(uint8_t buf[], int length) {
-  char *p = (char *)malloc(length * 6);
-  for (int i = 0, n = 0; i < length; ++i) {
-    if (i && i % 16 == 0)
-      n += sprintf(p + n, "\n");
-    n += sprintf(p + n, "0x%02x ", buf[i]);
-  }
-  return p;
 
-}
 uint32_t encode_operation(jbod_cmd_t cmd, int disk_num, int block_num)
 {
 
