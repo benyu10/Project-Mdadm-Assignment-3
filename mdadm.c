@@ -132,23 +132,23 @@ int mdadm_write(uint32_t addr, uint32_t len, const uint8_t *buf) {
   int sumDR = 0;
   int counter = 0;
   uint8_t buf1[256];
-  while (curr_addy<addr+len){
 
-    translate_address(curr_addy, &disk_num, &block_num, &offset);
-    seek(disk_num, block_num);
-    uint32_t op = encode_operation(JBOD_READ_BLOCK, 0, 0);
-    jbod_operation(op,buf1);
+  while (curr_addy<addr+len){ //keeps the loop going until the address matches
+
+    translate_address(curr_addy, &disk_num, &block_num, &offset); //finds the disk block and offset num
+    seek(disk_num, block_num); //looks for right disk and block num
+    uint32_t op = encode_operation(JBOD_READ_BLOCK, 0, 0); //reads the block
+    jbod_operation(op,buf1); //sets buf to contents of what was read
     
    if (counter == 0) //first block bc current block is equal to first block num                                                                      
     {
-      memcpy(buf1+offset,buf+sumDR ,min((JBOD_BLOCK_SIZE - offset),len));
-      seek(disk_num, block_num);
-      uint32_t ops = encode_operation(JBOD_WRITE_BLOCK, 0, 0);
+      memcpy(buf1+offset,buf+sumDR ,min((JBOD_BLOCK_SIZE - offset),len)); //writes the user data len into buf1 from buf
+      seek(disk_num, block_num); //this seeks to the block that needs to be written
+      uint32_t ops = encode_operation(JBOD_WRITE_BLOCK, 0, 0); //writes the contents into disk
       jbod_operation(ops,buf1);
-      data_read = min((JBOD_BLOCK_SIZE - offset),len);
+      data_read = min((JBOD_BLOCK_SIZE - offset),len); //calculates what was written
      
       counter += 1; //increments the counter so not in first block anymore                                                                           
-      //if last block, then disk + 1 to go to next disk
     }
    else if (total < JBOD_BLOCK_SIZE)//last block, read whats left of the data by using x                                                              
     {
@@ -166,13 +166,13 @@ int mdadm_write(uint32_t addr, uint32_t len, const uint8_t *buf) {
       seek(disk_num, block_num);
       uint32_t ops = encode_operation(JBOD_WRITE_BLOCK, 0, 0);
       jbod_operation(ops,buf1);
-      
+  
       data_read = JBOD_BLOCK_SIZE;
     }
 
-     sumDR = sumDR + data_read;
+   sumDR = sumDR + data_read; //the sum of all data read
      total = total - data_read;//keeps track of the bytes left to read                                                                                
-     curr_addy = curr_addy + data_read;
+     curr_addy = curr_addy + data_read; //calculates the address
   }
 
   
