@@ -505,13 +505,17 @@ int test_write_within_block() {
 
   };
 
+  // Making a copy of expected output to be written
+  uint8_t to_write[JBOD_BLOCK_SIZE];
+  memcpy(to_write, expected, JBOD_BLOCK_SIZE);
+  
   /* Write only the first SIZE bytes of the buffer |expected| at address 256. */
-  if (mdadm_write(256, SIZE, expected) != SIZE) {
+  if (mdadm_write(256, SIZE,to_write) != SIZE) {
     printf("failed: write failed\n");
     return 0;
   }
 
-  uint8_t out[JBOD_BLOCK_SIZE];
+  uint8_t out[JBOD_BLOCK_SIZE] = {0};
   /* This call reads raw disk contents into out buffer according to the
    * requirements of this test. */
   jbod_fill_block_test_write_within_block(out);
@@ -555,7 +559,11 @@ int test_write_across_blocks() {
     0xbb, 0xbb, 0xbb, 0xbb,
   };
 
-  if (mdadm_write(327928, SIZE, expected) != SIZE) {
+  // Making a copy of expected output to be written
+  uint8_t to_write[SIZE];
+  memcpy(to_write, expected, SIZE);
+  
+  if (mdadm_write(327928, SIZE, to_write) != SIZE) {
     printf("failed: write failed\n");
     return 0;
   }
@@ -617,7 +625,12 @@ int test_write_three_blocks() {
     0xbb, 0xcc,
   };
 
-  if (mdadm_write(528383, TEST3_SIZE, expected) != TEST3_SIZE) {
+	
+  // Making a copy of expected output to be written
+  uint8_t to_write[TEST3_SIZE];
+  memcpy(to_write, expected, TEST3_SIZE);
+
+  if (mdadm_write(528383, TEST3_SIZE, to_write) != TEST3_SIZE) {
     printf("failed: write failed\n");
     goto out;
   }
@@ -665,7 +678,12 @@ int test_write_across_disks() {
     0xff, 0xff, 0xff, 0xff,
   };
 
-  if (mdadm_write(917496, SIZE, expected) != SIZE) {
+
+  // Making a copy of expected output to be written
+  uint8_t to_write[SIZE];
+  memcpy(to_write, expected, SIZE);
+ 
+  if (mdadm_write(917496, SIZE, to_write) != SIZE) {
     printf("failed: write failed\n");
     goto out;
   }
